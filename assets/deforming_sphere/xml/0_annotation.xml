@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<annotation>
+  <!-- input setting -->
+  <exemplar filename = "src/exemplar.png"/>
+
+  <!-- for debug -->
+  <verbose on = "True"/>
+
+  <!-- internal data setting -->
+  <internal dirname = "temp" />
+</annotation>

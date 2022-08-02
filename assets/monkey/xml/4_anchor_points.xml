@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<anchor_points>
+    <!-- input setting -->
+    <object filename_template = "target/object/object_%03d.obj"/>
+
+    <!-- parameters -->
+    <params num_levels = "4" initial_radius_ratio = "0.05" deform = "False" coherence = "True"/>
+    <frames start = "1" end = "1"/>
+
+    <!-- for visualization purpose -->
+    <camera filename_template = "target/camera/camera_%03d.json"/>
+
+    <!-- for debug usage -->
+    <verbose on = "True"/>
+
+    <!-- output setting -->
+    <output filename = "dst/anchor_points/anchor_points/anchor_points_%03d.json"/>
+
+    <!-- internal data setting -->
+    <internal dirname = "temp" />
+</anchor_points>

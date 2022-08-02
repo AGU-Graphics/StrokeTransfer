@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<transfer>
+  <!-- input setting -->
+  <model orientation = "dst/regression/orientation_model.pickle" color = "dst/regression/color_model.pickle" length = "dst/regression/length_model.pickle" width = "dst/regression/width_model.pickle"/>
+  <diffuse filename_template = "target/diffuse/diffuse_%03d.exr"/>
+  <specular filename_template = "target/specular/specular_%03d.exr"/>
+  <camera filename_template = "target/camera/camera_%03d.json"/>
+  <object filename_template = "target/object/object_%03d.obj"/>
+
+  <!-- parameters -->
+  <frames start = "1" end = "1"/>
+
+  <!-- for debug -->
+  <verbose on = "True"/>
+
+  <!-- output setting -->
+  <output orientation = "dst/transfer/orientation/orientation_%03d.json" color = "dst/transfer/color/color_%03d.png" length = "dst/transfer/length/length_%03d.exr" width = "dst/transfer/width/width_%03d.exr"/>
+
+  <!-- internal data setting -->
+  <internal dirname = "temp" overwrite="False"/>
+</transfer>

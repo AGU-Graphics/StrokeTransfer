@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<smoothing>
+  <!-- input setting -->
+  <orientation filename_template ="dst/transfer/orientation/orientation_%03d.json"/>
+  <object filename_template = "target/object/object_%03d.obj"/>
+
+  <!-- parameters -->
+  <params lambda_temporal = "0.5" lambda_spatial = "0.07" deform = "False"/>
+  <frames start = "1" end = "1"/>
+
+  <!-- for visualization purpose -->
+  <camera filename_template = "target/camera/camera_%03d.json"/>
+  <diffuse filename_template = "target/diffuse/diffuse_%03d.exr"/>
+
+  <!-- for debug -->
+  <verbose on = "True"/>
+
+  <!-- output setting -->
+  <output orientation = "dst/smoothing/orientation/orientation_%03d.json" />
+
+  <!-- internal data setting -->
+  <internal dirname = "temp" overwrite="False"/>
+</smoothing>

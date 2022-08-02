@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<stroke>
+    <!-- input setting -->
+    <object filename_template = "target/object/object_%03d.obj"/>
+    <camera filename_template = "target/camera/camera_%03d.json"/>
+    <anchor filename_template = "dst/anchor_points/anchor_points/anchor_points_%03d.json"/>
+    <orientation filename_template = "dst/smoothing/orientation/orientation_%03d.json"/>
+    <color filename_template = "dst/transfer/color/color_%03d.png"/>
+    <length filename_template = "dst/transfer/length/length_%03d.exr"/>
+    <width filename_template = "dst/transfer/width/width_%03d.exr"/>
+    <undercoat filename_template = "dst/transfer/color/color_%03d.png"/>
+    <texture filename = "src/texture.png"/>
+
+    <!-- parameters -->
+    <params max_random_angular_offset = "5" resume = "False" num_levels = "4"/>
+    <optional_params length_multiplier = "1.0" length_offset = "0.0" width_multiplier = "1.0" width_offset = "0.0" coherence = "True"/>
+    <params_drawing incremental = "False" num_incremental_strokes_per_frame = "0" start_frame = "1"/>
+    <frames start = "1" end = "1"/>
+
+    <!-- for debug usage -->
+    <verbose on = "True"/>
+
+    <!-- output setting -->
+    <output stroke = "dst/stroke/stroke/stroke_%03d.png" final="dst/stroke/final/final_%03d.png"/>
+
+     <!-- internal data setting -->
+    <internal dirname = "temp" />
+</stroke>

@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<regression>
+   <!-- input setting -->
+  <model_type orientation = "1st-order" color = "nearest-neighbor" length = "nearest-neighbor" width = "nearest-neighbor"/>
+
+  <exemplar filename = "src/exemplar.png"/>
+  <annotation filename = "src/annotation.json"/>
+
+  <diffuse filename = "src/diffuse_001.exr"/>
+  <specular filename = "src/specular_001.exr"/>
+  <camera filename = "src/camera_001.json"/>
+  <object filename = "src/object_001.obj"/>
+
+  <!-- for debug -->
+  <verbose on = "True"/>
+
+  <!-- output setting -->
+  <model_output orientation = "dst/regression/orientation_model.pickle" color = "dst/regression/color_model.pickle" length = "dst/regression/length_model.pickle" width = "dst/regression/width_model.pickle"/>
+
+  <!-- internal data setting -->
+  <internal dirname = "temp" overwrite="False"/>
+</regression>
