@@ -132,3 +132,5 @@ dmypy.json
 # operating system files
 .DS_Store
 desktop.ini
+
+.idea
