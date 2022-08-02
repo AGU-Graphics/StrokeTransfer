@@ -4,7 +4,7 @@
 
 |  Exemplar  |  Reference Rendering  | Brush Texture |
 | ---- | ---- | ---- |
-|  ![exemplar](src/exemplar.png)  | ![reference_rendering](src/rendering_001.png)  |  <img src="src/texture.png" style="background-color:#333">  |
+|  ![exemplar](src/exemplar.png)  | ![reference_rendering](src/rendering_001.png)  |  <img src="src/texture.png" style="background:#333">  |
 
 ### target
 
