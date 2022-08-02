@@ -2,9 +2,9 @@
 
 ### src
 
-|  Exemplar  |  Reference Rendering  | Brush Texture |
-| ---- | ---- | ---- |
-|  ![exemplar](src/exemplar.png)  | ![reference_rendering](src/rendering_001.png)  |  <div style="background: #333"><img src="src/texture.png" ></div>  |
+|  Exemplar  |  Reference Rendering  | 
+| ---- | ---- | 
+|  ![exemplar](src/exemplar.png)  | ![reference_rendering](src/rendering_001.png)  | 
 
 ### target
 
