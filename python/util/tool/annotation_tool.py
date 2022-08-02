@@ -873,4 +873,4 @@ def main(exemplar_file=None, out_file=None):
 
 
 if __name__ == '__main__':
-    main(exemplar_file="data/style.png")
+    main()
