@@ -33,7 +33,7 @@ Some of output data are visualized as images.
 #### Stroke
 
 |  Stroke Layer  |  Final Rendering  | 
-| ---- | ---- | ---- |
+| ---- | ---- |
 |  ![stroke layer](stroke/stroke/stroke_001.png)  | ![final rendering](stroke/final/final_001.png)   |
 
 Final rendering frames.
