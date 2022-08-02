@@ -48,6 +48,11 @@ Selected set of the canonical sections are listed here:
 | ---- | ---- | ---- |
 |  ![I_d_parallel](regression/canonical_sections/I_d_parallel/I_d_parallel_000.png)   | ![n_perp](regression/canonical_sections/n_perp/n_perp_000.png)  | ![o_perp](regression/canonical_sections/o_perp/o_perp_000.png)  |
 
+#### Orientations
+
+|  Transferred Orientation  |  Filtered Orientation | 
+| ---- | ---- | 
+|  ![transferred orientation](transfer/view_orientations/orientation/orientation_001.png)   | ![filtered orientation](transfer/view_orientations/smooth_orientation/smooth_orientation_001.png)   | 
 
 #### Anchor Points
 

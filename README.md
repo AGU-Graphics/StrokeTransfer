@@ -172,6 +172,8 @@ This process generates the hierarchy of anchor points for stroke drawing process
 python ../../python/4_anchor_points.py xml/4_anchor_points.xml
 ```
 
+
+
 #### [5_stroke.py](python/5_stroke.py)
 
 The stroke renderer will generate the stroke layer (without undercoat) and the final result (with undercoat) in the output directory (in demo: dst/stroke)
