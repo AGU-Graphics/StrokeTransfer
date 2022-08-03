@@ -16,7 +16,7 @@ class StrokeOption(BaseOption):
 
     Attributes:
         object_file_template: object file template (.json) for the (animated) 3D object sequence (please provide a sequence of obj files for the frames even if the object is static).
-        camera_file_template: camera file name (.json) exported from blender (please use util/export_camera_info_from_blender.py for exporting this json file).
+        camera_file_template: camera file name (.json) exported from blender (please use blender/export_camera.py for exporting this json file).
         anchor_file_template: anchor file template (.json) for the anchor points (although we only have a single json file when the coherence is turned on True, please always specify the file name as a template e.g., "...%03d.json")
         orientation_file_template: orientation file template (.json) from vector field smoothing.
         color_file_template: color file template (.png) from transfer.

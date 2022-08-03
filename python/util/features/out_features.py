@@ -57,6 +57,8 @@ def out_mask_frame(A, option, frame, xlim=[0.0, 1.0], ylim=[0.0, 1.0]):
 
     mask_file = internal_file(option, data_name=f"mask", frame=frame, format="png", dir_name="features")
     save_fig(mask_file, transparent=False)
+    plt.clf()
+    plt.close()
 
 
 def apply_mask_frame(option, img_file, frame):

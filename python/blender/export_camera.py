@@ -8,6 +8,13 @@ import numpy as np
 
 
 def blendermat2python(A):
+    """ Convert blender matrix data to python array matrix.
+    Args:
+        A: blender matrix data (mathutils.Matrix).
+
+    Returns:
+        A_python: pure python array matrix.
+    """
     A_python = []
 
     for i in range(4):
@@ -18,22 +25,27 @@ def blendermat2python(A):
     return A_python
 
 
-def main(frame_start, frame_end, use_scene_frame_range):
+def export_camera(frame_start=1, frame_end=5, use_scene_frame_range=False):
+    """ export camera info from blender.
+
+    Args:
+        frame_start: first frame number.
+        frame_end: last frame number.
+        use_scene_frame_range: if True, frame_start and frame_end will be set from belnder scene setting.
+    """
     if use_scene_frame_range:
-        nStart = bpy.context.scene.frame_start
-        nEnd = bpy.context.scene.frame_end
-    else:
-        nStart = frame_start
-        nEnd = frame_end
+        frame_start = bpy.context.scene.frame_start
+        frame_end = bpy.context.scene.frame_end
 
     scene_dir = os.path.dirname(bpy.data.filepath)
 
-    for frame in range(nStart, nEnd + 1):
+    for frame in range(frame_start, frame_end + 1):
         bpy.context.scene.frame_set(frame)
 
-        # camera_data
-        camera = bpy.data.objects['Camera']
-        camera_data = bpy.data.objects['Camera'].data
+        # obtain active camera
+        scene = bpy.context.scene
+        camera = scene.camera
+        camera_data = camera.data
         p_camera = camera.location
         R_camera2world = camera.matrix_world
 
@@ -64,7 +76,7 @@ def main(frame_start, frame_end, use_scene_frame_range):
 
         camera_json["project_mat"] = p_mat
 
-        # output_part
+        # output.
         data_json = {}
         data_json["camera"] = camera_json
 
@@ -81,4 +93,4 @@ if __name__ == '__main__':
     parser.add_argument('--use_scene_frame_range', action='store_true')
 
     args = parser.parse_args(sys.argv[sys.argv.index('--') + 1:])
-    main(args.frame_start, args.frame_end, args.use_scene_frame_range)
+    export_camera(args.frame_start, args.frame_end, args.use_scene_frame_range)

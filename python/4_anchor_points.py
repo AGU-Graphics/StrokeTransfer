@@ -22,7 +22,7 @@ class AnchorPointsOption(BaseOption):
 
     Attributes:
         object_file_template: object file template (.json) for the (animated) 3D object sequence (please provide a sequence of obj files for the frames even if the object is static).
-        camera_file_template: (for visualization purpose only) camera file name (.json) exported from blender (please use util/export_camera_info_from_blender.py for exporting this json file).
+        camera_file_template: (for visualization purpose only) camera file name (.json) exported from blender (please use blender/export_camera.py for exporting this json file).
 
         num_levels: the number of levels in the hierarchy of anchor points.
         initial_radius_ratio: the initial radius used for Poisson disc sampling relative to the diagonal length of the bounding box.

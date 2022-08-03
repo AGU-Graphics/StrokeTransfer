@@ -60,19 +60,19 @@ We have tested a workflow with the latest blender 3.2.1 for 3DCG asset preparati
 - annotation.json: annotation file (.json) exported from annotation tool (0_annotation.py)
 - texture.png: brush texture image used for stroke rendering.
 - object_001.obj: 3D model data (.obj) exported from 3D CG software.
-- camera_001.json: 3D camera parameter file (.json) exported from 3D CG software (util/export_camera_info_from_blender.py).
+- camera_001.json: 3D camera parameter file (.json) exported from 3D CG software (blender/export_camera.py).
 - diffuse_001.exr: diffuse image (.exr) exported from 3D CG software.
 - specular_001.exr: specular image (.exr) exported from 3D CG software.
 
 
 [target] animated sequences to apply stroke transfer.
 - object/object_%03d.obj: 3D model data (.obj) exported from 3D CG software.
-- camera/camera_%03d.json: 3D camera parameter file (.json) exported from 3D CG software (util/export_camera_info_from_blender.py).
+- camera/camera_%03d.json: 3D camera parameter file (.json) exported from 3D CG software (blender/export_camera.py).
 - diffuse/diffuse_%03d.exr:  diffuse image (.exr) sequences exported from 3D CG software.
 - specular/specular_%03d.exr: specular image (.exr) sequences exported from 3D CG software.
 
-If you are interested in preparing custom asset with the blender, custom camera info exporter script ([util/export_camera_info_from_blender.py](python/util/export_camera_info_from_blender.py))
-We have tested a workflow with the latest blender 3.2.1 (3D CG Software), and then use a custom blender script (util/export_camera_info_from_blender.py) to obtain the camera parameters. 
+If you are interested in preparing custom asset with the blender, custom camera info exporter script ([blender/export_camera.py](python/blender/export_camera.py)).
+
 The other model data, diffuse image, and specular image can be generated with usual blender menus.
 
 ## Usage
