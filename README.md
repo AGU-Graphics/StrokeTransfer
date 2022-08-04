@@ -71,7 +71,10 @@ We have tested a workflow with the latest blender 3.2.1 for 3DCG asset preparati
 - diffuse/diffuse_%03d.exr:  diffuse image (.exr) sequences exported from 3D CG software.
 - specular/specular_%03d.exr: specular image (.exr) sequences exported from 3D CG software.
 
-If you are interested in preparing custom asset with the blender, custom camera info exporter script ([blender/export_camera.py](python/blender/export_camera.py)).
+If you are interested in preparing custom asset with the blender, please see the manual ([ExportDataFromBlender](./docs/ExportDataFromBlender.md)).
+
+- camera parameters (.json).
+- 3D model data (.obj).
 
 The other model data, diffuse image, and specular image can be generated with usual blender menus.
 
