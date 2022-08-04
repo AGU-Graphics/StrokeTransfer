@@ -210,11 +210,11 @@ You can simply do:
 
 - export the target data using the specified frame range parameters.
 ```shell
-blender scene.blend --background --python ../../python/blender/export_camera.py  -- --frame_start 1 --frame_end 5
+blender scene.blend --background --python ../../../python/blender/export_camera.py  -- --frame_start 1 --frame_end 5
 ```
 
 - export target data using the scene frame range settings.
 
 ```shell
-blender scene.blend --background --python ../../python/blender/export_camera.py  -- --frame_start 1 --frame_end 1 --use_scene_frame_range
+blender scene.blend --background --python ../../../python/blender/export_camera.py  -- --frame_start 1 --frame_end 1 --use_scene_frame_range
 ```
