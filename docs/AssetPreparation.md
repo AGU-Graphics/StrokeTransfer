@@ -1,8 +1,15 @@
-# Export Data From Blender
+# 3D CG Asset Preparation
 
-## Blender Scene Script
+The demo assets in our project were prepared using blender (3.0 or higher). 
 
-You can export camera parameters and object data using the blender scripts (please see [assets/monkey/blender/scene.blend](../assets/monkey/blender/scene.blend)).
+Our system requires to prepare the following elements from 3D scene:
+- 3D model data (.obj files): deforming objects are OK, assumed to be exported as a sequences of triangulated meshes.
+- camera parameters (.json files): film size, projection matrix will be used in our pipelines.
+- diffuse/specular rendering images (.exr files): you can prepare own lighting sequences to apply the regression and transfer.
+
+## Export Data Using Blender Scene Script
+
+You can export camera parameters and object data using the blender scripts (please see the demo blender file [assets/monkey/blender/scene.blend](../assets/monkey/blender/scene.blend)).
 
 ![blender script](../images/blender/blender_script.png)
 

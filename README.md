@@ -53,7 +53,7 @@ We provide example assets (e.g., "assets/monkey") for demo usage (you can quickl
 
 ### Asset Structure
 
-We have tested a workflow with the latest blender 3.2.1 for 3DCG asset preparation.
+We have tested a workflow with the blender (3.0 or higher) for 3DCG asset preparation.
 
 [src] single frame data mainly used for regression process.
 - exemplar.png: exemplar image (.png) drawn by the artist.
@@ -71,12 +71,12 @@ We have tested a workflow with the latest blender 3.2.1 for 3DCG asset preparati
 - diffuse/diffuse_%03d.exr:  diffuse image (.exr) sequences exported from 3D CG software.
 - specular/specular_%03d.exr: specular image (.exr) sequences exported from 3D CG software.
 
-If you are interested in preparing custom asset with the blender, please see the manual ([ExportDataFromBlender](./docs/ExportDataFromBlender.md)).
+If you are interested in preparing custom asset with the blender, please see the manual ([3D CG Asset Preparation](./docs/AssetPreparation.md)).
 
 - camera parameters (.json).
 - 3D model data (.obj).
 
-The other model data, diffuse image, and specular image can be generated with usual blender menus.
+The other diffuse or specular image can be generated with usual blender menus.
 
 ## Usage
 
@@ -132,10 +132,12 @@ The XML includes input/output settings and parameters to change the results of t
 If you want to make new annotations for the asset, please run the following command.
 
 ```shell
-python ../../python/0_annotation.py xml/0_annotation.xml
+python ../python/0_annotation.py xml/0_annotation.xml
 ```
 
-You can annotate stroke orientations and width (length will be automatically computed) using a simple GUI and export annotation.json data included in src directory.
+![annotation tool](image/../images/annotation/annotation_tool.png)
+
+You can annotate stroke orientations and width (length will be automatically computed) using a simple GUI and export annotation.json data (please see [Annotation Tool Manual](docs/1_Annotation.md) for more details).
 
 #### [1_regression.py](python/1_regression.py)
 
