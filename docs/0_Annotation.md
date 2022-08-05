@@ -1,4 +1,4 @@
-# Annotation Tool
+# Annotation Tool Manual
 
 ## User Interface
 
