@@ -24,13 +24,14 @@ The project was developed using Python 3 (Anaconda environment) with the followi
 
 [Additional dependencies]
 - OpenCV
-- OpenGL
+- PyOpenGL
 - glumpy
 - point cloud utils
 - libigl
 - pydec
 - h5py
 - imageio (OpenEXR format)
+- tqdm
 
 
 ## Quick Start
@@ -137,7 +138,7 @@ python ../python/0_annotation.py xml/0_annotation.xml
 
 ![annotation tool](image/../images/annotation/annotation_tool.png)
 
-You can annotate stroke orientations and width (length will be automatically computed) using a simple GUI and export annotation.json data (please see [Annotation Tool Manual](docs/1_Annotation.md) for more details).
+You can annotate stroke orientations and width (length will be automatically computed) using a simple GUI and export annotation.json data (please see [Annotation Tool Manual](docs/0_Annotation.md) for more details).
 
 #### [1_regression.py](python/1_regression.py)
 
