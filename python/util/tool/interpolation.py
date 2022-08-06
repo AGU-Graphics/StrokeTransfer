@@ -273,7 +273,7 @@ def lines2annotations(lines):
     return annotations
 
 
-def interpolate_vector_field_from_lines(lines, x_max=1.0, y_max=1.0, num_grids=30):
+def interpolate_vector_field_from_gui(lines, x_max=1.0, y_max=1.0, num_grids=30):
     """ Interpolate orientations from the data exported by annotation tool.
 
     Args:

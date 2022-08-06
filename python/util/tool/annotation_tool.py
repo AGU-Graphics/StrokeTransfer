@@ -10,11 +10,11 @@ from PIL import Image
 from PIL.ImageQt import ImageQt
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QSize, Qt, pyqtSignal
-from PyQt5.QtGui import QIcon, QImage, QPixmap, qGray
+from PyQt5.QtGui import QIcon, QImage, QPixmap, qGray, QKeySequence, QColor
 from PyQt5.QtWidgets import (QApplication, QFileDialog, QGridLayout,
                              QHBoxLayout, QLabel, QListWidget, QMainWindow,
                              QPushButton, QSizePolicy, QSlider, QSpinBox,
-                             QToolButton, QVBoxLayout, QWidget)
+                             QToolButton, QVBoxLayout, QWidget, QShortcut, QColorDialog)
 
 from util.tool import interpolation
 
@@ -190,25 +190,27 @@ class ZoomWidget(QSpinBox):
 
 
 class Canvas(QWidget):
+    """ Canvas ui to make annotations.
+    """
     double_clicked = pyqtSignal()
 
     def __init__(self):
         super(Canvas, self).__init__()
 
-        # 初期値
+        # initial value
         self.annotation = InputAnnotation()
         self.painter = QtGui.QPainter()
         self.pixmap = QtGui.QPixmap()
         self.scale = 1.0
-        self.rectangle_color = [QtGui.QColor(0, 255, 0, 128), QtGui.QColor(255, 0, 0, 128),
-                                QtGui.QColor(0, 0, 255, 128), QtGui.QColor(0, 255, 255, 128),
-                                QtGui.QColor(255, 255, 0, 200)]
+        self.color_list = [QtGui.QColor(0, 255, 0, 128), QtGui.QColor(255, 0, 0, 128),
+                           QtGui.QColor(0, 0, 255, 128), QtGui.QColor(0, 255, 255, 128),
+                           QtGui.QColor(255, 255, 0, 200)]
 
         self.selected_annotation_id = -1
         self.annotation_list = []
         self.image_max = 1
         self.filedata = []
-        self.trackingline = []
+        self.tracking_annotation = []
         self.visible_annotation = True
         self.visible_orientation = True
 
@@ -222,7 +224,7 @@ class Canvas(QWidget):
 
         self.setMouseTracking(True)
 
-    def openImage(self, filepath):
+    def load_image(self, filepath):
         img = QtGui.QImage()
 
         if not img.load(filepath):
@@ -230,37 +232,37 @@ class Canvas(QWidget):
 
         # QImage -> QPixmap
         self.pixmap = QtGui.QPixmap.fromImage(img)
-        self.calcimage(filepath)
+        self.calc_image_max(filepath)
 
     def paintEvent(self, event):
         if not self.pixmap:
             return super(Canvas, self).paintEvent(event)
 
-        p = self.painter
+        painter = self.painter
 
-        p.begin(self)
+        painter.begin(self)
 
-        p.scale(self.scale, self.scale)
+        painter.scale(self.scale, self.scale)
 
-        p.translate(self.offsetToCenterForQt())
+        painter.translate(self.offsetToCenterForQt())
 
-        p.drawPixmap(0, 0, self.pixmap)
+        painter.drawPixmap(0, 0, self.pixmap)
 
         if len(self.annotation.positions) > 1:
-            self.paint(p)
+            self.paint(painter)
 
-        if len(self.trackingline) > 1:
-            self.trackingpaint(p)
-            self.trackingline.clear()
+        if len(self.tracking_annotation) > 1:
+            self.paint_tracking_annotation(painter)
+            self.tracking_annotation.clear()
 
         if self.visible_orientation:
             if (len(self.annotation_list) > 0):
-                self.callinterpolation(p)
+                self.paint_orientations(painter)
 
         if self.visible_annotation:
-            self.paintallline(p)
+            self.paint_annotations(painter)
 
-        p.end()
+        painter.end()
 
     def offsetToCenter(self):
         scale = self.scale
@@ -291,15 +293,15 @@ class Canvas(QWidget):
             if event.button() == QtCore.Qt.LeftButton:
                 if len(self.annotation.positions) > 0:
                     if str(pos) != str(self.annotation.positions[-1]):
-                        self.add2nodes(pos)
+                        self.append_position(pos)
                 else:
-                    self.add2nodes(pos)
+                    self.append_position(pos)
                 self.repaint()
 
         if event.button() == QtCore.Qt.RightButton:
             if self.hasMouseTracking():
                 self.setMouseTracking(False)
-                self.trackingline.clear()
+                self.tracking_annotation.clear()
                 self.repaint()
             else:
                 self.setMouseTracking(True)
@@ -313,26 +315,26 @@ class Canvas(QWidget):
             pos = self.transformPos(point)
             pos[0] = self.changeto01(pos[0])
             pos[1] = self.changeto01(pos[1])
-            self.trackingline.append(self.annotation.positions[-1])
-            self.trackingline.append(pos)
+            self.tracking_annotation.append(self.annotation.positions[-1])
+            self.tracking_annotation.append(pos)
             self.repaint()
 
     def paint(self, painter):
-        pen = QtGui.QPen(self.rectangle_color[0])
+        pen = QtGui.QPen(self.color_list[0])
         pen.setWidth(max(1, int(round(self.image_max * self.annotation.width))))
         painter.setPen(pen)
         if self.annotation.positions:
-            self.paintline(self.annotation.positions, painter)
+            self.paint_annotation(self.annotation.positions, painter)
 
-    def paintallline(self, painter):
+    def paint_annotations(self, painter):
         x = 0
         if self.annotation_list:
             for l in self.annotation_list:
                 painter.setPen(self.setPen(x, l))
                 x += 1
-                self.paintline(l.positions, painter)
+                self.paint_annotation(l.positions, painter)
 
-    def paintline(self, list, painter):
+    def paint_annotation(self, list, painter):
         drawlist = []
 
         for l in list:
@@ -342,16 +344,16 @@ class Canvas(QWidget):
             painter.drawLine(self.changefrom01(startpoint), self.changefrom01(drawlist[ln]))
             startpoint = drawlist[ln]
 
-    def trackingpaint(self, painter):
-        pen = QtGui.QPen(self.rectangle_color[3])
+    def paint_tracking_annotation(self, painter):
+        pen = QtGui.QPen(self.color_list[3])
 
         pen.setWidth(max(1, int(round(self.image_max * self.annotation.width))))
         painter.setPen(pen)
-        self.paintline(self.trackingline, painter)
+        self.paint_annotation(self.tracking_annotation, painter)
 
     def setPen(self, select, i):
-        pen = QtGui.QPen(self.rectangle_color[1])  # 折れ線全体の色
-        pen2 = QtGui.QPen(self.rectangle_color[2])  # 選択した線の色
+        pen = QtGui.QPen(self.color_list[1])
+        pen2 = QtGui.QPen(self.color_list[2])
 
         pen.setWidth(max(1, int(round(self.image_max * i.width))))
         pen2.setWidth(max(1, int(round(self.image_max * i.width))))
@@ -364,10 +366,10 @@ class Canvas(QWidget):
     def transformPos(self, point):
         return point / self.scale - self.offsetToCenterForNp()
 
-    def add2nodes(self, point):
+    def append_position(self, point):
         self.annotation.positions.append(point)
 
-    def insertAnnotation(self, xy, width):
+    def insert_annotation(self, xy, width):
         self.selected_annotation_id = -1
         for n in xy:
             self.annotation.positions.append(copy.deepcopy(self.changeFromQPoint(n)))
@@ -376,7 +378,7 @@ class Canvas(QWidget):
         self.annotation = InputAnnotation()
         self.repaint()
 
-    def saveline(self, st):
+    def append_annotation(self, st):
         self.annotation.name = st
         co = copy.deepcopy(self.annotation)
         self.annotation_list.append(co)
@@ -384,12 +386,12 @@ class Canvas(QWidget):
         self.annotation = InputAnnotation()
         self.annotation.width = width
 
-    def deleteline(self):
+    def delete_annotation(self):
         self.annotation_list[self.selected_annotation_id].positions.clear()
         self.annotation_list.pop(self.selected_annotation_id)
         self.selected_annotation_id = -1
 
-    def selectLine(self, x):
+    def select_annotation(self, x):
         self.selected_annotation_id = x
 
     def changeto01(self, point):
@@ -398,7 +400,7 @@ class Canvas(QWidget):
     def changefrom01(self, point):
         return point * self.image_max
 
-    def calcimage(self, filepath):
+    def calc_image_max(self, filepath):
         img = Image.open(filepath)
         width = img.width
         height = img.height
@@ -415,15 +417,15 @@ class Canvas(QWidget):
         # numarray -> QPointF
         return PyQt5.QtCore.QPointF(numarray[0], numarray[1])
 
-    def callinterpolation(self, painter):
-        p, u = interpolation.interpolate_vector_field_from_lines(self.annotation_list)
-        pen = QtGui.QPen(self.rectangle_color[4])
+    def paint_orientations(self, painter):
+        p, u = interpolation.interpolate_vector_field_from_gui(self.annotation_list)
+        pen = QtGui.QPen(self.color_list[4])
 
         pen.setWidth(max(1, int(round(self.image_max * 0.0025))))
         painter.setPen(pen)
-        self.paint_vec(self.painter, p, u)
+        self.paint_vector(self.painter, p, u)
 
-    def paint_vec(self, painter, p, u):
+    def paint_vector(self, painter, p, u):
 
         v = self.calc_normal_vector(u)
         for i in range(0, len(p)):
@@ -449,11 +451,15 @@ class Canvas(QWidget):
 
 
 class MainWindow(QMainWindow):
-
-    def __init__(self, exemplar_file=None, out_file=None):
+    """ Main window of annotation tool.
+    """
+    def __init__(self, exemplar_file=None):
         super().__init__()
 
-        self.out_file = out_file
+        self.out_file = ""
+        if exemplar_file is not None:
+            out_dir = os.path.dirname(exemplar_file)
+            self.out_file = os.path.join(out_dir, "annotation.json")
 
         self.annotation_count = 0
         self.colors = []
@@ -461,35 +467,38 @@ class MainWindow(QMainWindow):
         self.canvas = Canvas()
         self.zoomWidget = ZoomWidget()
         self.zoomWidget.valueChanged.connect(self.paintCanvas)
-        self.canvas.double_clicked.connect(self.addline)
+        self.canvas.double_clicked.connect(self.append_annotation)
 
         # Left blocks for tool buttons.
         self.box_child1 = QVBoxLayout()
         self.box_child1.setAlignment(Qt.AlignTop)
 
-        self.open_image = self.make_button("Open\nImage", "icons/open_image.png", self.openFile)
-        self.view_line = self.make_button("Show\nAnnotation", "icons/view_line.png", self.changevisible,
-                                          toggle_mode=True)
-        self.view_line_vec = self.make_button("Show\nVectorField", "icons/view_vector.png", self.changevisible_vec,
-                                              toggle_mode=True)
-        self.open_annotation = self.make_button("Open\nAnnotation", "icons/open_annotation.png", self.openAnnotation)
-        self.save_button = self.make_button("Save\nAnnotation", "icons/save_image.png", self.saveAnnotation)
+        self.open_image_button = self.make_button("Open\nImage", "icons/open_image.png", self.open_image_file)
+        self.visible_annotation_button = self.make_button("Show\nAnnotation", "icons/view_line.png",
+                                                          self.change_visible_annotation,
+                                                          toggle_mode=True)
+        self.visible_orientation_button = self.make_button("Show\nVectorField", "icons/view_vector.png",
+                                                           self.change_visible_orientation,
+                                                           toggle_mode=True)
+        self.open_annotation_button = self.make_button("Open\nAnnotation", "icons/open_annotation.png",
+                                                       self.open_annotation)
+        self.save_annotation_button = self.make_button("Save\nAnnotation", "icons/save_image.png", self.save_annotation)
 
         self.box_child1.setSpacing(0)
         self.box_child1.setContentsMargins(0, 0, 0, 0)
-        self.box_child1.addWidget(self.open_image)
-        self.box_child1.addWidget(self.open_annotation)
-        self.box_child1.addWidget(self.view_line)
-        self.box_child1.addWidget(self.view_line_vec)
-        self.box_child1.addWidget(self.save_button)
+        self.box_child1.addWidget(self.open_image_button)
+        self.box_child1.addWidget(self.open_annotation_button)
+        self.box_child1.addWidget(self.visible_annotation_button)
+        self.box_child1.addWidget(self.visible_orientation_button)
+        self.box_child1.addWidget(self.save_annotation_button)
         self.box_child1.addStretch()
 
         # -----------------------------------------------------------------------
         # Right blocks for width slider, color settings, annotation list widget.
         self.box_child2 = QVBoxLayout()
-        self.slider = FloatSlider("Width", 0.01, 0.1, 0.03)
-        self.slider.valueChanged.connect(self.slider_change)
-        self.box_child2.addWidget(self.slider)
+        self.width_slider = FloatSlider("Width", 0.01, 0.1, 0.03)
+        self.width_slider.valueChanged.connect(self.slider_change)
+        self.box_child2.addWidget(self.width_slider)
 
         self.slider_change()
 
@@ -556,25 +565,25 @@ class MainWindow(QMainWindow):
         self.box_child2.addLayout(self.b2child_c2)
         self.box_child2.addLayout(self.b2child_c1)
 
-        self.listwidget = QListWidget()
+        self.annotation_list_ui = QListWidget()
 
-        self.listwidget.clicked.connect(self.annotationlist)
-        self.box_child2.addWidget(self.listwidget)
+        self.annotation_list_ui.clicked.connect(self.annotation_list_selected)
+        self.box_child2.addWidget(self.annotation_list_ui)
         self.b2child = QHBoxLayout()
 
-        self.b2add = QPushButton(self)
-        self.b2add.clicked.connect(self.addline)
-        self.b2add.setIcon(QIcon("icons/add_button.png"))
-        self.b2add.setIconSize(QSize(50, 50))
-        self.b2add.setFlat(False)
-        self.b2child.addWidget(self.b2add)
+        self.add_button = QPushButton(self)
+        self.add_button.clicked.connect(self.append_annotation)
+        self.add_button.setIcon(QIcon("icons/add_button.png"))
+        self.add_button.setIconSize(QSize(50, 50))
+        self.add_button.setFlat(False)
+        self.b2child.addWidget(self.add_button)
 
-        self.b2del = QPushButton(self)
-        self.b2del.clicked.connect(self.deleteline)
-        self.b2del.setIcon(QIcon("icons/delete_button.png"))
-        self.b2del.setIconSize(QSize(50, 50))
-        self.b2del.setFlat(False)
-        self.b2child.addWidget(self.b2del)
+        self.delete_button = QPushButton(self)
+        self.delete_button.clicked.connect(self.delete_annotation)
+        self.delete_button.setIcon(QIcon("icons/delete_button.png"))
+        self.delete_button.setIconSize(QSize(50, 50))
+        self.delete_button.setFlat(False)
+        self.b2child.addWidget(self.delete_button)
 
         self.box_child2.addLayout(self.b2child)
         # -----------------------------------------------------------------------
@@ -582,9 +591,9 @@ class MainWindow(QMainWindow):
 
         self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
-        self.slider.setFixedWidth(250)
-        self.listwidget.setFixedWidth(250)
-        self.listwidget.setStyleSheet(
+        self.width_slider.setFixedWidth(250)
+        self.annotation_list_ui.setFixedWidth(250)
+        self.annotation_list_ui.setStyleSheet(
             "QListWidget {padding-bottom: 3px; color : #333;  font-size: 18px; font-family: Arial;}")
 
         # ------------------------------------------------------------------------
@@ -605,14 +614,35 @@ class MainWindow(QMainWindow):
         self.main_widget.setLayout(self.vbox)
         self.setCentralWidget(self.main_widget)
 
+        # Short cut keys.
+        self.open_image_sc = self.make_shortcut("Ctrl+I", self.open_image_file)
+        self.open_annotation_sc = self.make_shortcut("Ctrl+O", self.open_annotation)
+        self.open_save_sc = self.make_shortcut("Ctrl+S", self.save_annotation)
+        self.enter_sc = self.make_shortcut("Return", self.append_annotation)
+        self.delete_sc = self.make_shortcut("Delete", self.delete_annotation)
+        self.quit_sc = self.make_shortcut("Ctrl+Q", QApplication.instance().quit)
+
+        self.screen_shot_sc = self.make_shortcut("Ctrl+G", self.screen_shot_widgets)
+
+        self.captured_widgets = {"open_image_button": self.open_image_button,
+                                 "visible_annotation_button": self.visible_annotation_button,
+                                 "visible_orientation_button": self.visible_orientation_button,
+                                 "open_annotation_button": self.open_annotation_button,
+                                 "save_annotation_button": self.save_annotation_button,
+                                 "canvas": self.canvas,
+                                 "width_slider": self.width_slider,
+                                 "annotation_list": self.annotation_list_ui,
+                                 "add_button": self.add_button,
+                                 "delete_button": self.delete_button}
+
         # Window size settings.
         self.setGeometry(50, 50, 930, 550)
-        self.setWindowTitle('Annotation Tool')
+        self.setWindowTitle("Annotation Tool")
         self.show()
-        self.readColorFile()
+        self.load_color_setting_file()
 
         if exemplar_file is not None:
-            self.openImage(exemplar_file)
+            self.load_image(exemplar_file)
 
     def make_button(self, tool_txt, tool_icon, tool_action, toggle_mode=False):
         button_group = QWidget()
@@ -632,68 +662,61 @@ class MainWindow(QMainWindow):
         button_group.setLayout(layout)
         return button_group
 
-    def openAnnotation(self):
-        filepath = QFileDialog.getOpenFileName(self, 'open file', '', 'Json (*.json)')[0]
+    def open_annotation(self):
+        filepath = QFileDialog.getOpenFileName(self, "open file", "", "Json (*.json)")[0]
         if filepath:
-            self.readAnnotation(filepath)
+            self.load_annotation(filepath)
 
-    def readAnnotation(self, filepath):
+    def load_annotation(self, filepath):
         if not self.canvas.pixmap.isNull():
             self.canvas.annotation_list.clear()
             self.canvas.annotation = InputAnnotation()
 
-            with open(filepath, 'r') as f:
+            with open(filepath, "r") as f:
                 read = f.read()
                 json_load = json.loads(read)
 
-            insertlistx = []
-            insertlisty = []
             inputdata = []
 
             for list in json_load:
-                for x in list["x"]:
-                    insertlistx.append(copy.deepcopy(x))
-                for y in list["y"]:
-                    insertlisty.append(copy.deepcopy(y))
-                for i in range(0, len(insertlistx)):
-                    inputdata.append(PyQt5.QtCore.QPointF(copy.deepcopy(insertlistx[i]), copy.deepcopy(insertlisty[i])))
-                self.canvas.insertAnnotation(copy.deepcopy(inputdata), list["width"])
+                for x, y in zip(list["x"], list["y"]):
+                    inputdata.append(PyQt5.QtCore.QPointF(x, y))
+                self.canvas.insert_annotation(copy.deepcopy(inputdata), list["width"])
                 inputdata.clear()
-                insertlistx.clear()
-                insertlisty.clear()
 
             self.annotation_count = 0
             for ln in self.canvas.annotation_list:
                 ln.name = str(self.annotation_count) + ":annotation"
                 self.annotation_count += 1
 
-            self.listwidget.clear()
+            self.annotation_list_ui.clear()
             count = 0
 
             for i in self.canvas.annotation_list:
-                self.listwidget.insertItem(count, i.name)
+                self.annotation_list_ui.insertItem(count, i.name)
                 count += 1
 
-    def changevisible(self):
+    def change_visible_annotation(self):
         if self.canvas.visible_annotation:
             self.canvas.visible_annotation = False
         else:
             self.canvas.visible_annotation = True
         self.canvas.repaint()
 
-    def changevisible_vec(self):
+    def change_visible_orientation(self):
         if self.canvas.visible_orientation:
             self.canvas.visible_orientation = False
         else:
             self.canvas.visible_orientation = True
         self.canvas.repaint()
 
-    def saveAnnotation(self):
-        filepath = QFileDialog.getSaveFileName(self, 'open file', '', 'Json (*.json)')[0]
-        if filepath:
-            self.change2json(filepath)
+    def save_annotation(self):
+        out_file = QFileDialog.getSaveFileName(self, "open file", self.out_file, "Json (*.json)")[0]
+        if out_file:
+            self.write_annotation(out_file)
+            self.out_file = out_file
 
-    def change2json(self, filepath):
+    def write_annotation(self, filepath):
         x = []
         y = []
 
@@ -703,38 +726,34 @@ class MainWindow(QMainWindow):
                     x.append(float(node[0]))
                     y.append(float(node[1]))
 
-                data = {'x': copy.deepcopy(x), 'y': copy.deepcopy(y), 'width': copy.deepcopy(line.width)}
+                data = {"x": copy.deepcopy(x), "y": copy.deepcopy(y), "width": copy.deepcopy(line.width)}
                 x.clear()
                 y.clear()
-                # Canvasに保存
+
                 self.canvas.filedata.append(copy.deepcopy(data))
-            self.saveToFile(filepath)
+            with open(filepath, "w") as f:
+                json.dump(self.canvas.filedata, f)
 
-    def saveToFile(self, filepath):
-        with open(filepath, 'w') as f:
-            json.dump(self.canvas.filedata, f)
-        print("save")
-
-    def addline(self):
+    def append_annotation(self):
         if len(self.canvas.annotation.positions) > 1:
 
             labelname = str(self.annotation_count) + ":annotation"
             self.annotation_count += 1
-            self.canvas.saveline(labelname)
+            self.canvas.append_annotation(labelname)
 
-            self.listwidget.clear()
+            self.annotation_list_ui.clear()
             count = 0
 
             for i in self.canvas.annotation_list:
-                self.listwidget.insertItem(count, i.name)
+                self.annotation_list_ui.insertItem(count, i.name)
                 count += 1
             self.canvas.setMouseTracking(True)
             self.canvas.repaint()
 
-    def deleteline(self):
+    def delete_annotation(self):
         if self.canvas.selected_annotation_id >= 0:
-            self.listwidget.takeItem(self.canvas.selected_annotation_id)
-            self.canvas.deleteline()
+            self.annotation_list_ui.takeItem(self.canvas.selected_annotation_id)
+            self.canvas.delete_annotation()
             self.canvas.repaint()
 
     def slider_change(self):
@@ -743,7 +762,7 @@ class MainWindow(QMainWindow):
         else:
             x = self.canvas.annotation
 
-        x.width = self.slider.value()
+        x.width = self.width_slider.value()
         self.canvas.repaint()
 
     def color_change1(self):
@@ -762,13 +781,15 @@ class MainWindow(QMainWindow):
         self.color_change(4)
 
     def color_change(self, num):
-        color = QtWidgets.QColorDialog.getColor()
+        color_old = self.canvas.color_list[num]
+        color = QColorDialog.getColor(color_old)
+        if not color.isValid():
+            return
         rgb = color.getRgb()
         self.button_update(num, rgb)
-        self.appdateColorFile()
+        self.update_color_setting_file()
 
     def button_update(self, num, rgb):
-
         # r, g, b = self.img.split()
         rc = rgb[0]
         gc = rgb[1]
@@ -778,7 +799,7 @@ class MainWindow(QMainWindow):
         if num != 4:
             alpha = 128
 
-        self.canvas.rectangle_color[num].setRgb(rc, gc, bc, alpha)
+        self.canvas.color_list[num].setRgb(rc, gc, bc, alpha)
 
         if self.canvas.pixmap:
             self.canvas.repaint()
@@ -795,48 +816,61 @@ class MainWindow(QMainWindow):
         else:
             self.color5.setStyleSheet(buttoncolor)
 
-    def readColorFile(self):
-        with open("colors/colors.json", 'r') as f:
+    def load_color_setting_file(self):
+        with open("colors/colors.json", "r") as f:
             read = f.read()
             json_load = json.loads(read)
         for list in json_load:
             for c in list["color"]:
                 self.colors.append(copy.deepcopy(c))
         for i in range(0, 5):
-            self.updateColor(i)
+            self.update_color(i)
 
-    def updateColor(self, num):
+    def update_color(self, num):
         rgb = self.colors[num]
         self.button_update(num, rgb)
 
-    def appdateColorFile(self):
+    def update_color_setting_file(self):
         output = []
         data = []
-        for c in self.canvas.rectangle_color:
+        for c in self.canvas.color_list:
             colors = copy.deepcopy(c.getRgb())
             output.append(copy.deepcopy(colors))
-        d = {'color': output}
+        d = {"color": output}
         data.append(d)
 
-        with open("colors/colors.json", 'w') as f:
+        with open("colors/colors.json", "w") as f:
             json.dump(data, f)
-        print("color appdate")
 
-    def annotationlist(self):
-        self.canvas.selectLine(self.listwidget.currentRow())
+    def annotation_list_selected(self):
+        self.canvas.select_annotation(self.annotation_list_ui.currentRow())
         x = self.canvas.annotation_list[self.canvas.selected_annotation_id]
-        self.slider.set_value(x.width)
+        self.width_slider.set_value(x.width)
         self.canvas.repaint()
 
-    def openFile(self):
-        img_file = QFileDialog.getOpenFileName(self, 'open file', '', 'Images (*.jpeg *.jpg *.png *.bmp)')[0]
-        self.openImage(img_file)
+    def open_image_file(self):
+        img_file = QFileDialog.getOpenFileName(self, "open file", "", "Images (*.jpeg *.jpg *.png *.bmp)")[0]
+        self.load_image(img_file)
 
-    def openImage(self, image_file):
+    def load_image(self, image_file):
         self.filepath = image_file
         if os.path.exists(self.filepath):
-            self.canvas.openImage(self.filepath)
+            self.canvas.load_image(self.filepath)
             self.paintCanvas()
+
+    def make_shortcut(self, key, action):
+        sc = QShortcut(QKeySequence(key), self)
+        sc.activated.connect(action)
+        return sc
+
+    def screen_shot_widgets(self):
+        def screen_shot_widget(widget, ui_name):
+            ui_pixmap = widget.grab()
+            ui_pixmap.save(f"screen_shots/{ui_name}.png", "png")
+
+        for ui_name in self.captured_widgets.keys():
+            widget = self.captured_widgets[ui_name]
+            screen_shot_widget(widget, ui_name)
 
     def paintCanvas(self):
         self.canvas.scale = self.scaleFitWindow()
@@ -865,9 +899,9 @@ class MainWindow(QMainWindow):
         super(MainWindow, self)
 
 
-def main(exemplar_file=None, out_file=None):
+def main(exemplar_file=None):
     app = QApplication(sys.argv)
-    win = MainWindow(exemplar_file=exemplar_file, out_file=out_file)
+    win = MainWindow(exemplar_file=exemplar_file)
     win.show()
     sys.exit(app.exec_())
 
