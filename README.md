@@ -133,7 +133,7 @@ The XML includes input/output settings and parameters to change the results of t
 If you want to make new annotations for the asset, please run the following command.
 
 ```shell
-python ../python/0_annotation.py xml/0_annotation.xml
+python ../../python/0_annotation.py xml/0_annotation.xml
 ```
 
 ![annotation tool](image/../images/annotation/annotation_tool.png)
