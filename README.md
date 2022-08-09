@@ -193,7 +193,7 @@ python ../../python/5_stroke.py xml/5_stroke.xml
 |  ![Undercoat](assets/deforming_sphere/dst/transfer/color/color_001.png)  | ![stroke](assets/deforming_sphere/dst/stroke/stroke/stroke_001.png)  |  ![final](assets/deforming_sphere/dst/stroke/final/final_001.png)  |
 
 
-#### Citing
+## Citing
 
 If you find Stroke Transfer useful for your research or work, please use the following BibTeX entry.
 
@@ -209,3 +209,7 @@ If you find Stroke Transfer useful for your research or work, please use the fol
         doi = {10.1145/3528233.3530703}
     }
 ```
+
+## License
+
+This project is released under [MIT License](LICENSE.md).
