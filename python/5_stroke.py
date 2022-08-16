@@ -149,7 +149,9 @@ def cli_stroke(option):
     """
     
     # cmd_temp: command line string template.
-    cmd_temp = "python stroke_per_single_frame.py"
+    module_dir = os.path.abspath(os.path.dirname(__file__))
+    stroke_module_path = os.path.join(module_dir, "stroke_per_single_frame.py")
+    cmd_temp = f"python {stroke_module_path}"
 
     for frame in verbose_range(option.verbose, option.frame_range()):
         # cmd: command line string.
