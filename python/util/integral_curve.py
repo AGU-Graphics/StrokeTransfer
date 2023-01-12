@@ -76,7 +76,7 @@ def search_connect_edge(search_point, search_vector, search_FE, search_F_idx, se
             E_point = mesh_data.V[mesh_data.EV[search_FE[FE_idx], 1]]
             E_vector = mesh_data.V[mesh_data.EV[search_FE[FE_idx], 0]] - mesh_data.V[mesh_data.EV[search_FE[FE_idx], 1]]
         _, E_p, v_param, e_param = math_intersection_of_two_lines(search_point, search_vector, E_point, E_vector)
-        if not search_FE_idx == 4:
+        if not search_FE_idx == -1:
             if v_param >= 0.0 and 0.0 <= e_param <= 1.0 and param[0] <= v_param:
                 next_p = E_p
                 param = np.array([v_param, e_param])
@@ -89,7 +89,7 @@ def search_connect_edge(search_point, search_vector, search_FE, search_F_idx, se
     return next_p, param, search_FE_idx
 
 
-def find_barycentric_coordinate_from_edge(search_FE, next_E_idx, search_FE_idx, param):
+def find_barycentric_coordinate_from_edge(search_FE, next_E_idx, param):
     w2 = -1
     w3 = -1
     if search_FE[0] == next_E_idx:
@@ -101,16 +101,6 @@ def find_barycentric_coordinate_from_edge(search_FE, next_E_idx, search_FE_idx, 
     elif search_FE[2] == next_E_idx:
         w2 = 0
         w3 = param[1]
-    if search_FE_idx == 4:
-        if search_FE[0] == next_E_idx:
-            w2 = param[1]
-            w3 = 0
-        elif search_FE[1] == next_E_idx:
-            w2 = 1 - param[1]
-            w3 = param[1]
-        elif search_FE[2] == next_E_idx:
-            w2 = 0
-            w3 = 1 - param[1]
     w1 = 1.0 - (w2 + w3)
     barycentric_coordinate = np.array([w1, w2, w3], dtype=np.float32).reshape(-1, 3)
     return barycentric_coordinate
@@ -181,7 +171,7 @@ def create_one_integral_curve(image_data, mesh_data, anchor_mesh_data, search_an
         search_point = next_point
         search_E_idx = next_E_idx
         search_FE = mesh_data.FE[search_F_idx, :]
-        search_barycentric_coordinate = find_barycentric_coordinate_from_edge(search_FE, search_E_idx, search_FE_idx, param)
+        search_barycentric_coordinate = find_barycentric_coordinate_from_edge(search_FE, search_E_idx, param)
         V_in_search_F = mesh_data.V[mesh_data.F[search_F_idx, :]].reshape(-1, 3)
 
     return plots, plots_normal
@@ -192,7 +182,7 @@ def append_one_integral_curve_data(integral_curve_datas, anchor_mesh_data, searc
         integral_curve_datas.indexes.append(search_anchor_F_idx)
 
         width = anchor_mesh_data.width[search_anchor_F_idx]
-        width = sum(anchor_mesh_data.width) / width.shape[0] if width == 0 else width
+        width = sum(anchor_mesh_data.width) / anchor_mesh_data.width.shape[0] if width == 0 else width
         integral_curve_datas.widths.append(width)
         integral_curve_datas.colors.append(anchor_mesh_data.color[search_anchor_F_idx, :].tolist())
 
