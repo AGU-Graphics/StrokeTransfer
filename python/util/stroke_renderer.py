@@ -192,8 +192,8 @@ class AnchorMeshData:
         self.img_x = (self.point_proj[:, 0] * image_data.img_width).astype(np.int)
         self.img_y = ((1 - self.point_proj[:, 1]) * image_data.img_height).astype(np.int)
 
-        self.color = image_data.color_img[np.clip(self.img_y, 0, image_data.img_height),
-                     np.clip(self.img_x, 0, image_data.img_width), :]
+        self.color = image_data.color_img[np.clip(self.img_y, 0, image_data.img_height-1),
+                     np.clip(self.img_x, 0, image_data.img_width-1), :]
 
     def create_vector_angle(self, angular_file_name):
         with open(angular_file_name) as f:
