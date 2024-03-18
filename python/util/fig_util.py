@@ -37,7 +37,7 @@ def image_points(width, height):
 
 
 def font_setting(font_family='Times New Roman', font_size=12):
-    plt.rcParams['text.usetex'] = True
+    # plt.rcParams['text.usetex'] = True
     plt.rcParams['font.family'] = font_family
     plt.rcParams["font.size"] = font_size
 
